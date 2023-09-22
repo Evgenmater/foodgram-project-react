@@ -6,7 +6,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.pagination import PageNumberPagination
+from rest_framework.pagination import PageNumberPagination, LimitOffsetPagination
 from rest_framework.permissions import (
     AllowAny, IsAuthenticatedOrReadOnly, IsAuthenticated
 )
@@ -31,6 +31,7 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     permission_classes = (AllowAny,)
+    pagination_class = None
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
@@ -38,6 +39,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
+    pagination_class = LimitOffsetPagination
     permission_classes = (IsAuthorOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
@@ -156,6 +158,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     permission_classes = (AllowAny,)
+    pagination_class = None
     filter_backends = (DjangoFilterBackend,)
     filterset_class = IngredientFilter
     search_fields = ('^name',)

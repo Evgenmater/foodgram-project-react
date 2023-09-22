@@ -187,7 +187,6 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         """Метод представления модели"""
-
         serializer = RecipeSerializer(
             instance,
             context={
