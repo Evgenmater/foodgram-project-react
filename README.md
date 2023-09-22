@@ -70,7 +70,7 @@ python manage.py createsuperuser
 ```bash
 python manage.py collectstatic --no-input
 ```
-### Заполните базу тестовыми ингредиентами: 
+### Заполните базу данных ингредиентами: 
 ```bash
 python manage.py push_ingredients
 ```
