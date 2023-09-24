@@ -1,11 +1,12 @@
 from django.db.models import Q
 from django_filters import filters
 from django_filters.rest_framework import FilterSet
+
 from recipes.models import Ingredient, Recipe
 
 
 class IngredientFilter(FilterSet):
-    '''Поиск игредиента на началу названия.'''
+    """Поиск игредиента по названию."""
 
     name = filters.CharFilter(
         field_name='name', method='get_name_or_contains'
@@ -22,7 +23,7 @@ class IngredientFilter(FilterSet):
 
 
 class RecipeFilter(FilterSet):
-    '''Фильтрация рецептов.'''
+    """Фильтрация рецептов."""
 
     tags = filters.AllValuesMultipleFilter(field_name='tags__slug')
     is_favorited = filters.BooleanFilter(method='filter_is_favorited')

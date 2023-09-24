@@ -11,7 +11,7 @@ from users.models import User
 
 
 class OptionalRecipeSerializer(serializers.ModelSerializer):
-    """Дополнительный сериализатор для рецептов """
+    """Дополнительный сериализатор для рецептов."""
 
     image = Base64ImageField()
 
@@ -34,7 +34,7 @@ class CustomUserSerializer(UserSerializer):
         )
 
     def get_is_subscribed(self, obj):
-        """Метод для подписки(True/False)"""
+        """Метод для подписки(True/False)."""
         user = self.context.get('request').user
         if user.is_anonymous:
             return False
@@ -110,20 +110,21 @@ class RecipeSerializer(serializers.ModelSerializer):
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):
-    """Сериализация данных подписок пользователя"""
+    """Сериализация данных подписок пользователя."""
 
     recipes = SerializerMethodField()
     recipes_count = SerializerMethodField()
+    is_subscribed = SerializerMethodField(read_only=True)
 
     class Meta:
-        fields = (
-            'email', 'id', 'username', 'first_name', 'last_name', 'recipes',
-            'recipes_count'
-        )
         model = User
+        fields = (
+            'email', 'id', 'username', 'first_name', 'last_name',
+            'is_subscribed', 'recipes', 'recipes_count'
+        )
 
     def get_recipes(self, obj):
-        """Метод для получения рецептов"""
+        """Метод для получения рецептов."""
         request = self.context.get('request')
         limit = request.GET.get('recipes_limit')
         recipes = obj.recipes.all()
@@ -135,8 +136,15 @@ class SubscriptionSerializer(serializers.ModelSerializer):
 
     @staticmethod
     def get_recipes_count(obj):
-        """Метод для получения количество рецептов"""
+        """Метод для получения количество рецептов."""
         return obj.recipes.count()
+
+    def get_is_subscribed(self, obj):
+        """Метод для подписки(True/False)"""
+        user = self.context.get('request').user
+        if user.is_anonymous:
+            return False
+        return user.is_subscribed.filter(author=obj).exists()
 
 
 class CreateRecipeSerializer(serializers.ModelSerializer):
@@ -154,19 +162,27 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
             'ingredients', 'tags', 'image', 'name', 'text', 'cooking_time',
         )
 
+    def validate(self, data):
+        """Валидация рецепта для обязательного поля."""
+        if 'ingredients' not in data:
+            raise ValidationError({'ingredients': 'Это поле обязательное!'})
+        if 'tags' not in data:
+            raise ValidationError({'tags': 'Это поле обязательное!'})
+        return data
+
     def validate_ingredients(self, value):
         """Валидация для Ингредиента."""
         if not value:
-            raise ValidationError({
-                'ingredients': 'Надо добавить ингредиенты!'
-            })
+            raise ValidationError(
+                'Надо добавить ингредиенты!'
+            )
         ingredients_list = []
         for item in value:
             ingredient = get_object_or_404(Ingredient, id=item['id'])
             if ingredient in ingredients_list:
-                raise ValidationError({
-                    'ingredients': 'Вы уже добавили этот ингредиент!'
-                })
+                raise ValidationError(
+                    'Вы уже добавили этот ингредиент!'
+                )
             if int(item['amount']) <= 0:
                 raise ValidationError({
                     'amount': 'Минимальное значение поля - 1!'
@@ -177,16 +193,29 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
     def validate_tags(self, value):
         """Валидация для Тега."""
         if not value:
-            raise ValidationError({'tags': 'Выберите Тег!'})
+            raise ValidationError('Выберите Тег!')
         tags_list = []
         for tag in value:
             if tag in tags_list:
-                raise ValidationError({'tags': 'Вы уже добавили Тег!'})
+                raise ValidationError('Вы уже добавили Тег!')
             tags_list.append(tag)
         return value
 
+    def validate_image(self, value):
+        """Валидация для image."""
+        if not value:
+            raise ValidationError('Поле не может быть пустым!')
+        return value
+
+    def validate_cooking_time(self, value):
+        if not value:
+            raise ValidationError(
+                'Выберите время приготовления!'
+            )
+        return value
+
     def to_representation(self, instance):
-        """Метод представления модели"""
+        """Метод представления модели."""
         serializer = RecipeSerializer(
             instance,
             context={

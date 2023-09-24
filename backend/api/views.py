@@ -6,15 +6,13 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.pagination import (
-    PageNumberPagination, LimitOffsetPagination
-)
 from rest_framework.permissions import (
     AllowAny, IsAuthenticatedOrReadOnly, IsAuthenticated
 )
 
 from api.filters import IngredientFilter, RecipeFilter
 from api.permissions import IsAuthorOrReadOnly
+from api.pagintaion import CustomPagination
 from api.serializers import (
     TagSerializer, IngredientSerializer, RecipeSerializer,
     CreateRecipeSerializer, CustomUserSerializer,
@@ -41,13 +39,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
-    pagination_class = LimitOffsetPagination
+    pagination_class = CustomPagination
     permission_classes = (IsAuthorOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
 
     def get_serializer_class(self):
-        """Метод для вызова определенного сериализатора. """
+        """Метод для вызова определенного сериализатора."""
 
         if self.action in ('list', 'retrieve'):
             return RecipeSerializer
@@ -123,7 +121,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @staticmethod
     def txt_file_ingredients(ingredients):
-        """Метод для добавление ингредиентов в список для загрузки"""
+        """Метод для добавление ингредиентов в список для загрузки."""
         list_shopping = ''
         for ingredient in ingredients:
             list_shopping += (
@@ -142,7 +140,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     )
     def download_shopping_cart(self, request):
         """
-        Метод для загрузки ингредиентов из выбранных рецептов
+        Метод для загрузки ингредиентов из выбранных рецептов.
         """
         ingredients = IngredientRecipe.objects.filter(
             recipe__shopping_recipe__user=request.user
@@ -172,17 +170,17 @@ class UserViewSet(UserViewSet):
     queryset = User.objects.all()
     serializer_class = CustomUserSerializer
     permission_classes = (IsAuthenticatedOrReadOnly,)
-    pagination_class = PageNumberPagination
+    pagination_class = CustomPagination
 
     @action(
         methods=['post', 'delete'],
         detail=True,
         permission_classes=(IsAuthenticated,),
     )
-    def subscribe(self, request, pk):
+    def subscribe(self, request, id):
         """Метод для подписки/отписки на/от пользователя."""
         user = request.user
-        author = get_object_or_404(User, id=pk)
+        author = get_object_or_404(User, id=id)
         change_of_status = Subscription.objects.filter(
             user=user.id, author=author.id
         )
@@ -208,7 +206,10 @@ class UserViewSet(UserViewSet):
                 author=author
             )
             subscriber.save()
-            return Response(serializer.data[0])
+            return Response(
+                serializer.data[0],
+                status=status.HTTP_201_CREATED
+            )
         if change_of_status.exists():
             change_of_status.delete()
             return Response(
