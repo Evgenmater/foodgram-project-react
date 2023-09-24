@@ -97,6 +97,8 @@ class RecipeSerializer(serializers.ModelSerializer):
     def get_is_favorited(self, obj):
         """Метод поля is_favorited с булевым значением."""
         user = self.context.get('request').user
+        if user == obj.author:
+            return False
         if user.is_anonymous:
             return False
         return user.user_favorited.filter(recipes=obj).exists()
@@ -104,6 +106,8 @@ class RecipeSerializer(serializers.ModelSerializer):
     def get_is_in_shopping_cart(self, obj):
         """Метод поля is_in_shopping_cart с булевым значением."""
         user = self.context.get('request').user
+        if user == obj.author:
+            return False
         if user.is_anonymous:
             return False
         return user.user_shopping_cart.filter(recipes=obj).exists()

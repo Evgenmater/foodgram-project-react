@@ -92,7 +92,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         detail=True,
         permission_classes=(IsAuthenticated,),
     )
-    def favorite(self, request, pk):
+    def favorites(self, request, pk):
         """Метод для добавления/удаления рецепта из избранного."""
         user = request.user
         recipe = get_object_or_404(Recipe, id=pk)
