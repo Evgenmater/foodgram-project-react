@@ -110,7 +110,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             return False
         if user.is_anonymous:
             return False
-        return user.user_shopping_cart.filter(recipes=obj).exists()
+        return user.recipe_shopping_cart.filter(recipes=obj).exists()
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):
