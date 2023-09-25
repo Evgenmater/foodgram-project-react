@@ -101,7 +101,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             return False
         if user.is_anonymous:
             return False
-        return user.recipes_favorited.filter(recipes=obj).exists()
+        return user.favorited.filter(recipes=obj).exists()
 
     def get_is_in_shopping_cart(self, obj):
         """Метод поля is_in_shopping_cart с булевым значением."""
@@ -110,7 +110,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             return False
         if user.is_anonymous:
             return False
-        return user.recipe_shopping_cart.filter(recipes=obj).exists()
+        return user.shopping_cart.filter(recipes=obj).exists()
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):

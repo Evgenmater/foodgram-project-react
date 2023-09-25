@@ -143,7 +143,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         Метод для загрузки ингредиентов из выбранных рецептов.
         """
         ingredients = IngredientRecipe.objects.filter(
-            recipe__shopping_recipe__user=request.user
+            shopping_cart__user=request.user
         ).values(
             'ingredient__name',
             'ingredient__measurement_unit'
