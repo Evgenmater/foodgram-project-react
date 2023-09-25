@@ -1,5 +1,5 @@
-from django.db.models import Sum
-from django.http import HttpResponse
+# from django.db.models import Sum
+# from django.http import HttpResponse
 from djoser.views import UserViewSet
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
@@ -19,7 +19,7 @@ from api.serializers import (
     SubscriptionSerializer, OptionalRecipeSerializer,
 )
 from recipes.models import (
-    Tag, Ingredient, Recipe, Favourite, ShoppingCart, IngredientRecipe
+    Tag, Ingredient, Recipe, Favourite, ShoppingCart
 )
 
 from users.models import Subscription, User
