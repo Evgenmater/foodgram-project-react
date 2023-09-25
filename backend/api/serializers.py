@@ -6,7 +6,9 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.fields import SerializerMethodField
 
-from recipes.models import Ingredient, IngredientRecipe, Recipe, Tag
+from recipes.models import (
+    Ingredient, IngredientRecipe, Recipe, Tag, Favourite, ShoppingCart
+)
 from users.models import User
 
 
@@ -95,22 +97,41 @@ class RecipeSerializer(serializers.ModelSerializer):
         )
 
     def get_is_favorited(self, obj):
-        """Метод поля is_favorited с булевым значением."""
-        user = self.context.get('request').user
-        if user == obj.author:
+        """Метод проверки на добавление в избранное."""
+        request = self.context.get('request')
+        if request is None or request.user.is_anonymous:
             return False
-        if user.is_anonymous:
-            return False
-        return user.favorited.filter(recipes=obj).exists()
+        return Favourite.objects.filter(
+            user=request.user, recipe=obj
+        ).exists()
 
     def get_is_in_shopping_cart(self, obj):
-        """Метод поля is_in_shopping_cart с булевым значением."""
-        user = self.context.get('request').user
-        if user == obj.author:
+        """Метод проверки на присутствие в корзине."""
+
+        request = self.context.get('request')
+        if request is None or request.user.is_anonymous:
             return False
-        if user.is_anonymous:
-            return False
-        return user.shopping_cart.filter(recipes=obj).exists()
+        return ShoppingCart.objects.filter(
+            user=request.user, recipe=obj
+        ).exists()
+
+    # def get_is_favorited(self, obj):
+    #     """Метод поля is_favorited с булевым значением."""
+    #     user = self.context.get('request').user
+    #     if user == obj.author:
+    #         return False
+    #     if user.is_anonymous:
+    #         return False
+    #     return user.favorited.filter(recipes=obj).exists()
+
+    # def get_is_in_shopping_cart(self, obj):
+    #     """Метод поля is_in_shopping_cart с булевым значением."""
+    #     user = self.context.get('request').user
+    #     if user == obj.author:
+    #         return False
+    #     if user.is_anonymous:
+    #         return False
+    #     return user.shopping_cart.filter(recipes=obj).exists()
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):
