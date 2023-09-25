@@ -1,5 +1,5 @@
-# from django.db.models import Sum
-# from django.http import HttpResponse
+from django.db.models import Sum
+from django.http import HttpResponse
 from djoser.views import UserViewSet
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
@@ -19,7 +19,7 @@ from api.serializers import (
     SubscriptionSerializer, OptionalRecipeSerializer,
 )
 from recipes.models import (
-    Tag, Ingredient, Recipe, Favourite, ShoppingCart
+    Tag, Ingredient, Recipe, Favourite, ShoppingCart, IngredientRecipe
 )
 
 from users.models import Subscription, User
@@ -38,7 +38,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
     """CRUD для рецепта."""
 
     queryset = Recipe.objects.all()
-    serializer_class = RecipeSerializer
     pagination_class = CustomPagination
     permission_classes = (IsAuthorOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
@@ -119,37 +118,37 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-    # @staticmethod
-    # def txt_file_ingredients(ingredients):
-    #     """Метод для добавление ингредиентов в список для загрузки."""
-    #     list_shopping = ''
-    #     for ingredient in ingredients:
-    #         list_shopping += (
-    #             f'{ingredient["ingredient__name"]}  - '
-    #             f'{ingredient["sum"]}'
-    #             f'({ingredient["ingredient__measurement_unit"]})\n'
-    #         )
-    #     return list_shopping
+    @staticmethod
+    def txt_file_ingredients(ingredients):
+        """Метод для добавление ингредиентов в список для загрузки."""
+        list_shopping = ''
+        for ingredient in ingredients:
+            list_shopping += (
+                f'{ingredient["ingredient__name"]}  - '
+                f'{ingredient["sum"]}'
+                f'({ingredient["ingredient__measurement_unit"]})\n'
+            )
+        return list_shopping
 
-    # @action(
-    #     detail=False,
-    #     methods=('get',),
-    #     permission_classes=(IsAuthenticated,),
-    #     url_path='download_shopping_cart',
-    #     url_name='download_shopping_cart',
-    # )
-    # def download_shopping_cart(self, request):
-    #     """
-    #     Метод для загрузки ингредиентов из выбранных рецептов.
-    #     """
-    #     ingredients = IngredientRecipe.objects.filter(
-    #         shopping_cart__user=request.user
-    #     ).values(
-    #         'ingredient__name',
-    #         'ingredient__measurement_unit'
-    #     ).annotate(sum=Sum('amount'))
-    #     list_shopping = self.txt_file_ingredients(ingredients)
-    #     return HttpResponse(list_shopping, content_type='text/plain')
+    @action(
+        detail=False,
+        methods=('get',),
+        permission_classes=(IsAuthenticated,),
+        url_path='download_shopping_cart',
+        url_name='download_shopping_cart',
+    )
+    def download_shopping_cart(self, request):
+        """
+        Метод для загрузки ингредиентов из выбранных рецептов.
+        """
+        ingredients = IngredientRecipe.objects.filter(
+            shopping_cart__user=request.user
+        ).values(
+            'ingredient__name',
+            'ingredient__measurement_unit'
+        ).annotate(sum=Sum('amount'))
+        list_shopping = self.txt_file_ingredients(ingredients)
+        return HttpResponse(list_shopping, content_type='text/plain')
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
