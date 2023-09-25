@@ -61,7 +61,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
         """Метод для добавления/удаления покупки ингредиентов рецепта."""
         user = request.user
         recipe = get_object_or_404(Recipe, id=pk)
-        serializer = OptionalRecipeSerializer(recipe)
         if request.method == 'POST':
             if ShoppingCart.objects.filter(user=user, recipes=recipe).exists():
                 return Response(
@@ -69,6 +68,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
                     status=status.HTTP_400_BAD_REQUEST
                 )
             ShoppingCart.objects.create(user=user, recipes=recipe)
+            serializer = OptionalRecipeSerializer(recipe)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         if request.method == 'DELETE':
@@ -96,7 +96,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
         """Метод для добавления/удаления рецепта из избранного."""
         user = request.user
         recipe = get_object_or_404(Recipe, id=pk)
-        serializer = OptionalRecipeSerializer(recipe)
         if request.method == 'POST':
             if Favourite.objects.filter(user=user, recipes=recipe).exists():
                 return Response(
@@ -104,6 +103,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
                     status=status.HTTP_400_BAD_REQUEST
                 )
             Favourite.objects.create(user=user, recipes=recipe)
+            serializer = OptionalRecipeSerializer(recipe)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         if request.method == 'DELETE':
