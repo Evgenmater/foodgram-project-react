@@ -29,7 +29,7 @@ class RecipeAdmin(admin.ModelAdmin):
     filter_horizontal = ('ingredients',)
 
     def count_favorites(self, obj):
-        return obj.recipes_favorited.count()
+        return obj.favorited.count()
 
 
 class IngredientInRecipeAdmin(admin.ModelAdmin):
