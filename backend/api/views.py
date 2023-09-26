@@ -47,9 +47,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     def get_serializer_class(self):
         """Метод для вызова определенного сериализатора."""
-
         if self.action in ('list', 'retrieve'):
             return RecipeSerializer
+
         elif self.action in ('create', 'partial_update'):
             return CreateRecipeSerializer
 
@@ -63,11 +63,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
         user = request.user
         recipe = get_object_or_404(Recipe, id=pk)
         if request.method == 'POST':
+
             if ShoppingCart.objects.filter(user=user, recipes=recipe).exists():
                 return Response(
                     f'{recipe.name} есть в списке покупок у пользователя',
                     status=status.HTTP_400_BAD_REQUEST
                 )
+
             ShoppingCart.objects.create(user=user, recipes=recipe)
             serializer = OptionalRecipeSerializer(recipe)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -77,12 +79,14 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 user=user,
                 recipes=recipe
             )
+
             if shopping_obj.exists():
                 shopping_obj.delete()
                 return Response(
                     f'Рецепт {recipe.name} удалён из списка покупок',
                     status=status.HTTP_204_NO_CONTENT
                 )
+
             return Response(
                 f'В списке покупок нет рецепта {recipe.name}',
                 status=status.HTTP_400_BAD_REQUEST
@@ -97,24 +101,29 @@ class RecipeViewSet(viewsets.ModelViewSet):
         """Метод для добавления/удаления рецепта из избранного."""
         user = request.user
         recipe = get_object_or_404(Recipe, id=pk)
+
         if request.method == 'POST':
+
             if Favourite.objects.filter(user=user, recipes=recipe).exists():
                 return Response(
                     f'{recipe.name} уже есть в избранном у пользователя',
                     status=status.HTTP_400_BAD_REQUEST
                 )
+
             Favourite.objects.create(user=user, recipes=recipe)
             serializer = OptionalRecipeSerializer(recipe)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         if request.method == 'DELETE':
             favourite_obj = Favourite.objects.filter(user=user, recipes=recipe)
+
             if favourite_obj .exists():
                 favourite_obj .delete()
                 return Response(
                     f'Рецепт {recipe.name} удалён из избранного',
                     status=status.HTTP_204_NO_CONTENT
                 )
+
             return Response(
                 f'В избранном нет рецепта {recipe.name}',
                 status=status.HTTP_400_BAD_REQUEST
@@ -127,6 +136,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def download_shopping_cart(self, request):
         """Метод для скачивания ингредиентов в txt формате."""
         user = request.user
+
         if not user.shopping_cart.exists():
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
@@ -142,18 +152,18 @@ class RecipeViewSet(viewsets.ModelViewSet):
             f'Список покупок для: {user.get_full_name()}\n\n'
             f'Дата: {today:%Y-%m-%d}\n\n'
         )
+
         shopping_list += '\n'.join([
             f'- {ingredient["ingredients__name"]} '
             f'({ingredient["ingredients__measurement_unit"]})'
             f' - {ingredient["amount"]}'
             for ingredient in ingredients
         ])
-        shopping_list += f'\n\nFoodgram ({today:%Y})'
 
-        filename = f'{user.username}_shopping_list.txt'
+        shopping_list += '\n\nСпасибо, что пользуетесь сайтом Foodgram!'
+        file_name = f'{user.username}_shopping_list.txt'
         response = HttpResponse(shopping_list, content_type='text/plain')
-        response['Content-Disposition'] = f'attachment; filename={filename}'
-
+        response['Content-Disposition'] = f'attachment; filename={file_name}'
         return response
 
 
@@ -195,12 +205,15 @@ class UserViewSet(UserViewSet):
             many=True,
             context={'request': request}
         )
+
         if request.method == 'POST':
+
             if user == author:
                 return Response(
                     'Нельзя подписаться на самого себя.',
                     status=status.HTTP_400_BAD_REQUEST
                 )
+
             if change_of_status.exists():
                 return Response(
                     'Вы уже подписаны на пользователя.',
@@ -215,12 +228,14 @@ class UserViewSet(UserViewSet):
                 serializer.data[0],
                 status=status.HTTP_201_CREATED
             )
+
         if change_of_status.exists():
             change_of_status.delete()
             return Response(
                 f'Вы отписались от {author}',
                 status=status.HTTP_204_NO_CONTENT
             )
+
         return Response(
             f'Вы не подписаны на пользователя {author}',
             status=status.HTTP_400_BAD_REQUEST

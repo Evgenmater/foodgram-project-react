@@ -36,6 +36,7 @@ class CustomUserSerializer(UserSerializer):
     def get_is_subscribed(self, obj):
         """Метод для подписки(True/False)."""
         user = self.context.get('request').user
+
         if user.is_anonymous:
             return False
         return user.is_subscribed.filter(author=obj).exists()
@@ -97,6 +98,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     def get_is_favorited(self, obj):
         """Метод поля is_favorited с булевым значением."""
         user = self.context.get('request').user
+
         if user.is_anonymous:
             return False
         return user.favorited.filter(recipes=obj).exists()
@@ -104,6 +106,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     def get_is_in_shopping_cart(self, obj):
         """Метод поля is_in_shopping_cart с булевым значением."""
         user = self.context.get('request').user
+
         if user.is_anonymous:
             return False
         return user.shopping_cart.filter(recipes=obj).exists()
@@ -128,6 +131,7 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         limit = request.GET.get('recipes_limit')
         recipes = obj.recipes.all()
+
         if limit:
             recipes = recipes[:int(limit)]
         return OptionalRecipeSerializer(
@@ -166,8 +170,10 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         """Валидация рецепта для обязательного поля."""
         if 'ingredients' not in data:
             raise ValidationError({'ingredients': 'Это поле обязательное!'})
+
         if 'tags' not in data:
             raise ValidationError({'tags': 'Это поле обязательное!'})
+
         return data
 
     def validate_ingredients(self, value):
@@ -177,17 +183,21 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
                 'Надо добавить ингредиенты!'
             )
         ingredients_list = []
+
         for item in value:
             ingredient = get_object_or_404(Ingredient, id=item['id'])
+
             if ingredient in ingredients_list:
                 raise ValidationError(
                     'Вы уже добавили этот ингредиент!'
                 )
+
             if int(item['amount']) <= 0:
                 raise ValidationError({
                     'amount': 'Минимальное значение поля - 1!'
                 })
             ingredients_list.append(ingredient)
+
         return value
 
     def validate_tags(self, value):
@@ -208,6 +218,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         return value
 
     def validate_cooking_time(self, value):
+        """Валидация для cooking_time."""
         if not value:
             raise ValidationError(
                 'Выберите время приготовления!'
@@ -231,6 +242,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         tags = validated_data.pop('tags')
         recipe = Recipe.objects.create(**validated_data, author=user)
         recipe.tags.set(tags)
+
         for ingredient in ingredients:
             IngredientRecipe.objects.create(
                 ingredients_id=ingredient.get('id'),
@@ -245,6 +257,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         tags = validated_data.pop('tags')
         ingredients = validated_data.pop('ingredients')
         recipe.tags.set(tags)
+
         for ingredient in ingredients:
             IngredientRecipe.objects.create(
                 ingredients_id=ingredient.get('id'),
