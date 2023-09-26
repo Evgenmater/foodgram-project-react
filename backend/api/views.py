@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.db.models import Sum
 from django.http import HttpResponse
 from djoser.views import UserViewSet
@@ -118,37 +120,41 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-    @staticmethod
-    def txt_file_ingredients(ingredients):
-        """Метод для добавление ингредиентов в список для загрузки."""
-        list_shopping = ''
-        for ingredient in ingredients:
-            list_shopping += (
-                f'{ingredient["ingredient__name"]}  - '
-                f'{ingredient["sum"]}'
-                f'({ingredient["ingredient__measurement_unit"]})\n'
-            )
-        return list_shopping
-
     @action(
         detail=False,
-        methods=('get',),
-        permission_classes=(IsAuthenticated,),
-        url_path='download_shopping_cart',
-        url_name='download_shopping_cart',
+        permission_classes=[IsAuthenticated]
     )
     def download_shopping_cart(self, request):
-        """
-        Метод для загрузки ингредиентов из выбранных рецептов.
-        """
+        """Метод для скачивания ингредиентов в txt формате."""
+        user = request.user
+        if not user.shopping_cart.exists():
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
         ingredients = IngredientRecipe.objects.filter(
-            shopping_cart__user=request.user
+            recipes__shopping_cart__user=request.user
         ).values(
-            'ingredient__name',
-            'ingredient__measurement_unit'
-        ).annotate(sum=Sum('amount'))
-        list_shopping = self.txt_file_ingredients(ingredients)
-        return HttpResponse(list_shopping, content_type='text/plain')
+            'ingredients__name',
+            'ingredients__measurement_unit'
+        ).annotate(amount=Sum('amount'))
+
+        today = datetime.today()
+        shopping_list = (
+            f'Список покупок для: {user.get_full_name()}\n\n'
+            f'Дата: {today:%Y-%m-%d}\n\n'
+        )
+        shopping_list += '\n'.join([
+            f'- {ingredient["ingredients__name"]} '
+            f'({ingredient["ingredients__measurement_unit"]})'
+            f' - {ingredient["amount"]}'
+            for ingredient in ingredients
+        ])
+        shopping_list += f'\n\nFoodgram ({today:%Y})'
+
+        filename = f'{user.username}_shopping_list.txt'
+        response = HttpResponse(shopping_list, content_type='text/plain')
+        response['Content-Disposition'] = f'attachment; filename={filename}'
+
+        return response
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):

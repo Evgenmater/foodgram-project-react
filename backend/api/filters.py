@@ -1,10 +1,12 @@
 from django.db.models import Q
 from django_filters.rest_framework import filters, FilterSet
+
 from recipes.models import Ingredient, Recipe
 
 
 class IngredientFilter(FilterSet):
     """Поиск игредиента на началу названия."""
+
     name = filters.CharFilter(
         field_name='name', method='get_name_or_contains'
     )
