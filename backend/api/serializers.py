@@ -205,10 +205,13 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         if not value:
             raise ValidationError('Выберите Тег!')
         tags_list = []
+
         for tag in value:
+
             if tag in tags_list:
                 raise ValidationError('Вы уже добавили Тег!')
             tags_list.append(tag)
+
         return value
 
     def validate_image(self, value):
