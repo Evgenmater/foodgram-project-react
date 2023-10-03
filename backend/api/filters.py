@@ -1,6 +1,20 @@
 from django_filters.rest_framework import filters, FilterSet
 
-from recipes.models import Recipe
+from recipes.models import Ingredient, Recipe
+
+
+class FilterForIngredients(FilterSet):
+
+    name = filters.CharFilter(field_name='name', method='filter_ingredient')
+
+    class Meta:
+        model = Ingredient
+        fields = ('name',)
+
+    def filter_ingredient(self, queryset, name, value):
+        return queryset.filter(
+            name__istartswitch=value
+        )
 
 
 class FilterForRecipes(FilterSet):

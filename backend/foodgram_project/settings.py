@@ -7,16 +7,14 @@ load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# SECRET_KEY = os.getenv('KEY', default='key')
-SECRET_KEY = 'django-insecure-ocu5uq31g%=nkgx9bhvoi=u%nqye1s9-$^$v%t_u52wamm-e($'
+SECRET_KEY = os.getenv('KEY', default='key')
 DEBUG = False
 
 
-# ALLOWED_HOSTS = [
-#     os.getenv('IP_HOST'), os.getenv('IP_LOCAL_HOST'),
-#     os.getenv('LOCAL_HOST'), os.getenv('DN_HOST')
-# ]
-ALLOWED_HOSTS = ['158.160.77.11', 'localhost', '127.0.0.1', 'foodgram.myftp.biz']
+ALLOWED_HOSTS = [
+    os.getenv('IP_HOST'), os.getenv('IP_LOCAL_HOST'),
+    os.getenv('LOCAL_HOST'), os.getenv('DN_HOST')
+]
 
 
 # Application definition

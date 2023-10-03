@@ -9,7 +9,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, SAFE_METHODS
 
-from api.filters import FilterForRecipes
+from api.filters import FilterForRecipes, FilterForIngredients
 from api.permissions import IsAuthorOrReadOnlyPermission
 from api.pagination import ModifiedPagination
 from api.serializers import (
@@ -28,7 +28,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('name',)
+    filterset_class = FilterForIngredients
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
