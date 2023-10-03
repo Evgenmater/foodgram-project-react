@@ -13,7 +13,7 @@ class FilterForIngredients(FilterSet):
 
     def filter_ingredient(self, queryset, name, value):
         return queryset.filter(
-            name__istartswitch=value
+            name__startswith=value
         )
 
 
