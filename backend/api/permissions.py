@@ -6,6 +6,7 @@ class IsAuthorOrReadOnlyPermission(BasePermission):
     Класс с разным уровнем доступа. Если пользователь не авторизован,
     то доступ только к просмотру страницы.
     """
+
     def has_permission(self, request, view):
         if request.method in SAFE_METHODS:
             return True

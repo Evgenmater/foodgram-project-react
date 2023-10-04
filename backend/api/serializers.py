@@ -37,10 +37,6 @@ class CustomUserSerializer(UserSerializer):
         )
 
     def get_is_subscribed(self, obj):
-        """
-        Метод для определения подписки на пользователя True/False.
-        Если пользователь подписан на автора - True,если нет - False.
-        """
         user = self.context.get('request').user
         if user.is_authenticated:
             return user.subscriber.filter(author=obj).exists()

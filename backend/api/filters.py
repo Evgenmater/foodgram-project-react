@@ -4,6 +4,10 @@ from recipes.models import Ingredient, Recipe
 
 
 class FilterForIngredients(FilterSet):
+    """
+    Фильтрация для ингредиентов по имени(name) от набранных букв, например:
+    вводишь буквы "бал" выдаёт все слова из БД - балык, бальзам.
+    """
 
     name = filters.CharFilter(field_name='name', method='filter_ingredient')
 
