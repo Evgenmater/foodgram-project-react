@@ -80,6 +80,10 @@
 
     ```
    https://foodgram.myftp.biz/admin/
+   
+   Логин и пароль от админ-панели
+   Login - testserv@list.ru
+   password - 753123
     ```
 
 * Пример запрос к API:
