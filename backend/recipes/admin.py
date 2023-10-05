@@ -9,6 +9,15 @@ admin.site.site_title = 'Админ-панель сайта Фудграм'
 admin.site.site_header = 'Админ-панель сайта Фудграм'
 
 
+class IngredientInline(admin.StackedInline):
+    """
+    Allows profile to be added when creating user
+    """
+    model = IngredientRecipe
+    extra = 1
+    min_num = 1
+
+
 class RecipeAdmin(admin.ModelAdmin):
 
     list_display = (
@@ -18,6 +27,7 @@ class RecipeAdmin(admin.ModelAdmin):
     )
     list_filter = ('author', 'name', 'tags')
     filter_horizontal = ('ingredients',)
+    inlines = [IngredientInline]
 
     def count_favorites(self, obj):
         return obj.favorited.count()

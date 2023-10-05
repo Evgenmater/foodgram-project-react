@@ -1,5 +1,6 @@
 from colorfield.fields import ColorField
 from django.db import models
+from django.core.validators import MinValueValidator
 
 from users.models import User
 
@@ -47,6 +48,12 @@ class Ingredient(models.Model):
     class Meta:
         verbose_name = 'Ингредиент'
         verbose_name_plural = 'Ингредиенты'
+        constraints = [
+            models.UniqueConstraint(
+                fields=('name', 'measurement_unit'),
+                name='unique_name_measurement_unit'
+            )
+        ]
 
     def __str__(self):
         return self.name
@@ -78,6 +85,8 @@ class Recipe(models.Model):
     )
     cooking_time = models.PositiveSmallIntegerField(
         'Время приготовления',
+        default=1,
+        validators=[MinValueValidator(1)]
     )
 
     class Meta:
@@ -105,7 +114,9 @@ class IngredientRecipe(models.Model):
     )
 
     amount = models.PositiveSmallIntegerField(
-        'Количество',
+        'Количество ингредиентов',
+        default=1,
+        validators=[MinValueValidator(1)]
     )
 
     class Meta:
