@@ -92,6 +92,8 @@
     https://foodgram.myftp.biz/api/
 
     https://foodgram.myftp.biz/api/recipes/
+
+    https://foodgram.myftp.biz/api/docs/
     ```
 
 ### Автор:  
