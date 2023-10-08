@@ -1,5 +1,5 @@
 from datetime import datetime as dt
-from django.db.models import F
+from django.db.models import Sum
 from django.http import FileResponse
 from djoser.views import UserViewSet
 from django.shortcuts import get_object_or_404
@@ -48,7 +48,7 @@ class UserViewSet(UserViewSet):
 
     queryset = User.objects.all()
     serializer_class = CustomUserSerializer
-    permission_classes = (IsAuthorOrReadOnlyPermission,)
+    permission_classes = (IsAuthenticated,)
     pagination_class = ModifiedPagination
 
     @action(
@@ -197,7 +197,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         ).values(
             'ingredients__name',
             'ingredients__measurement_unit'
-        ).annotate(amount=F('amount'))
+        ).annotate(amount=Sum('amount'))
         file_path = 'shop_list.txt'
         with open(file_path, 'w', encoding='utf8') as f:
             f.write(

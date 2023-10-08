@@ -121,7 +121,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
     tags = serializers.PrimaryKeyRelatedField(
         many=True, queryset=Tag.objects.all()
     )
-    ingredients = IngredientForRecipeSerializer(many=True, required=False)
+    ingredients = IngredientForRecipeSerializer(many=True)
     image = Base64ImageField()
 
     class Meta:
@@ -133,8 +133,10 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
     def validate(self, data):
         if 'ingredients' not in data:
             raise ValidationError({'ingredients': 'Обязательное поле!'})
-        if 'tags' not in data:
+        elif 'tags' not in data:
             raise ValidationError({'tags': 'Обязательное поле!'})
+        elif 'cooking_time' not in data:
+            raise ValidationError({'cooking_time': 'Обязательное поле!'})
         return data
 
     def validate_tags(self, value):
@@ -148,10 +150,16 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         return value
 
     def validate_ingredients(self, ingredients):
+        ingredient_id = Ingredient.objects.values_list('id', flat=True)
+        for ing in ingredients:
+            if ing['id'] not in ingredient_id:
+                raise ValidationError(
+                    'Такого ингредиента не существует!'
+                )
         if not ingredients:
             raise ValidationError(
                 'Нужно добавить ингредиенты!'
-            )
+            ) 
         ingredients_list = []
         for product in ingredients:
             ingredient = get_object_or_404(Ingredient, id=product['id'])
@@ -159,10 +167,6 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
                 raise ValidationError(
                     'Этот ингредиент добавлен!'
                 )
-            elif int(product['amount']) <= 0:
-                raise ValidationError({
-                    'amount': 'Минимальное значение - 1!'
-                })
             ingredients_list.append(ingredient)
         return ingredients
 
