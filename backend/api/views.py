@@ -50,6 +50,7 @@ class UserViewSet(UserViewSet):
     serializer_class = CustomUserSerializer
     permission_classes = (IsAuthenticated,)
     pagination_class = ModifiedPagination
+    lookup_value_regex = '\d+'
 
     @action(
         methods=['post', 'delete'],
@@ -59,7 +60,7 @@ class UserViewSet(UserViewSet):
     def subscribe(self, request, id):
         author_recipe = get_object_or_404(User, id=id)
         subscribe_queryset = request.user.subscriber.filter(
-            author=author_recipe.id
+            author=id
         )
         if request.method == 'POST':
             if request.user == author_recipe:
@@ -124,6 +125,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthorOrReadOnlyPermission,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = FilterForRecipes
+    lookup_value_regex = '\d+'
 
     def get_serializer_class(self):
         if self.request.method in SAFE_METHODS:
