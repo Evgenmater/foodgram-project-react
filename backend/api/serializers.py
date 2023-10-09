@@ -159,7 +159,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         if not ingredients:
             raise ValidationError(
                 'Нужно добавить ингредиенты!'
-            ) 
+            )
         ingredients_list = []
         for product in ingredients:
             ingredient = get_object_or_404(Ingredient, id=product['id'])
