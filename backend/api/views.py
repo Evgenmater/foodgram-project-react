@@ -50,7 +50,6 @@ class UserViewSet(UserViewSet):
     serializer_class = CustomUserSerializer
     permission_classes = (IsAuthenticated,)
     pagination_class = ModifiedPagination
-    lookup_value_regex = r'\d+'
 
     @action(
         methods=['post', 'delete'],
@@ -125,7 +124,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthorOrReadOnlyPermission,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = FilterForRecipes
-    lookup_value_regex = r'\d+'
 
     def get_serializer_class(self):
         if self.request.method in SAFE_METHODS:
