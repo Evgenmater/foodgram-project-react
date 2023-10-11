@@ -1,6 +1,6 @@
 from colorfield.fields import ColorField
 from django.db import models
-from django.core.validators import MinValueValidator
+from django.core.validators import MinValueValidator, RegexValidator 
 
 from users.models import User
 
@@ -17,6 +17,14 @@ class Tag(models.Model):
         max_length=7,
         default='#FF0000',
         unique=True,
+        validators=[
+            RegexValidator(
+                regex='^#([A-F0-9]{6}|[A-F0-9]{3})$',
+                message=(
+                    'Неверное значение! Введите значение в верхнем регистре!'
+                )
+            )
+        ],
     )
     slug = models.SlugField(
         'Идентификатор',

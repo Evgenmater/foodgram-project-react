@@ -167,7 +167,10 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
                 raise ValidationError(
                     'Этот ингредиент добавлен!'
                 )
-            ingredients_list.append(ingredient)
+            elif 'amount' not in product:
+                raise ValidationError({
+                    'amount': 'обязательное поле!'
+                })
         return ingredients
 
     def validate_image(self, image):
