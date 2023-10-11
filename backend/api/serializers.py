@@ -171,6 +171,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
                 raise ValidationError({
                     'amount': 'обязательное поле!'
                 })
+            ingredients_list.append(ingredient)
         return ingredients
 
     def validate_image(self, image):
